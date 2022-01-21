@@ -67,11 +67,11 @@ else:
 
 #movid = [int(x) for x in str(movieid[10])]
 imagelinks = []
-for mov in movieid:
+for x in range(len(movies)):
     link = 'https://a.ltrbxd.com/resized/film-poster/'
-    for number in mov:
+    for number in movieid[x]:
         link += str(number) + '/'
-    link += str(movieid[1])+'-'+movies[1].replace(" ","-").lower()+'-0-125-0-187-crop.jpg'
+    link += str(movieid[x])+'-'+movies[x].replace(" ","-").lower()+'-0-125-0-187-crop.jpg'
     imagelinks.append(link)
 
 print(*imagelinks, sep = '\n')
