@@ -1,17 +1,32 @@
 import random
 import tkinter as tk
+import watchlist
 from PIL import ImageTk, Image
+import os
 
-    
-def changeText(self,textt):
-    self.configure(text =textt)
+#get movies and links
+movies, movieids, imagelinks = watchlist.getMovies()
 
 def chooseMovie():
-    list1.append(movielist[random.randint(0,len(movielist))])
-    tex = ""
-    for i in list1:
-        tex = tex + str(i) + '\n' 
-    changeText(listView,tex)
+  print ('length of movies = ', len(movies))
+  print ('length of moviesids = ', len(movieids))
+  print ('length of imagelinks = ', len(imagelinks))
+  ran = random.randint(0,len(movies)-1)
+  print ('random int = ', ran)
+  return ran
+
+ran = chooseMovie()
+
+watchlist.downloadImage(ran,imagelinks)
+
+print("chosen movie is: ", movies[ran])
+print(imagelinks[ran])
+
+
+
+#User Interface
+def changeText(self,textt):
+    self.configure(text =textt)
         
 def center_window(width=700, height=700):
     # get screen width and height
@@ -26,12 +41,6 @@ def center_window(width=700, height=700):
 list1 = []
 
 #open file and export movies to a listt
-file = open('watchlist.txt','r',encoding="utf8")
-f = file.readlines()
-
-movielist = []
-for line in f:
-    movielist.append(line.strip())
     
 
 root = tk.Tk()
@@ -47,23 +56,25 @@ canvas.pack()
 label = tk.Label(canvas, text = "Press the button to select a random movie from the list", bg='white')
 label.place(relwidth=0.57, relheight=0.03, relx=0.215, rely=0.035)
 
-listView = tk.Label(canvas, bg='white', anchor= 'n')
-listView.place(relwidth=0.7, relheight=0.7, relx=0.15, rely=0.1)
+try:
+  img = Image.open('img.png')
+  img = ImageTk.PhotoImage(img)
+  imgLabel = tk.Label(canvas, image = img, anchor= 'center')
+  imgLabel.place(relwidth=0.7, relheight=0.7, relx=0.15, rely=0.1)
+except FileNotFoundError:
+  print('Image file not found')
+  imgLabel = tk.Label(canvas, text = "Photo not found" ,anchor= 'center')
+  imgLabel.place(relwidth=0.7, relheight=0.7, relx=0.15, rely=0.1)
+
 
 label1 = tk.Label(canvas, text = "", bg="#809FFF")
 label1.place(relwidth=0.7, relheight=0.03, relx=0.15, rely=0.815)
 
 button = tk.Button(canvas, bg='gray', fg='red', text="Movie time!", command= chooseMovie)
 button.place(relwidth=0.2, relheight=0.05, relx=0.4, rely=0.86)
-    
-img = Image.open('img.png')
-img = ImageTk.PhotoImage(img)
-imglabel = tk.Label(canvas, image = img)
-imglabel.place(relwidth=0.2, relheight=0.05, relx=0.4, rely=0.86)
-
-
-
 
 
 
 root.mainloop()
+
+os.remove("img.png")
