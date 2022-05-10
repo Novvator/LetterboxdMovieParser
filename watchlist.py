@@ -11,7 +11,7 @@ from PIL import ImageTk, Image
 
 
 
-def getMovies():
+def getMovies(username, genre):
     i = 1
     x = 1
 
@@ -23,10 +23,10 @@ def getMovies():
     'fantasy', 'history', 'horror', 'music', 'mystery', 'romance', 'science-fiction', 'thriller', 'tv-movie', 'war', 'western']
 
     #get username
-    username = (input('Type your username: ')).lower()
+    username = username.lower()
 
     #get genre
-    inp = input('Choose genre or random or all: ')
+    inp = genre.lower()
 
     #if genre = random
     if(inp == 'random'):
@@ -71,21 +71,30 @@ def getMovies():
     else:
         print("You have no " + inp.title() +  " movies in your watchlist.")
 
-    imagelinks = findImageLinks(movies,movieids)
-    return movies, movieids, imagelinks
+    return movies, movieids
 
 
-#find movie poster image links
-def findImageLinks(movies, movieids):
-    imagelinks = []
-    for x in range(len(movies)):
-        link = 'https://a.ltrbxd.com/resized/film-poster/'
-        for number in movieids[x]:
-            link += str(number) + '/'
-        link += str(movieids[x])+'-'+movies[x].replace(" ","-").lower()+'-0-460-0-690-crop.jpg'
-        imagelinks.append(link)
-    return imagelinks
 
+def findMovieLink(movie):
+    movie = movie.replace(".","")
+    movie = movie.replace(":","")
+    movie = movie.replace(",","")
+    movie = movie.replace("+","")
+    movie = movie.replace("(","")
+    movie = movie.replace(")","")
+    movie = movie.replace(" ", "-")
+    link = 'https://letterboxd.com/film/' + movie
+    link = link.lower()
+    return link
+
+def findImage(movie):
+    link = findMovieLink(movie)
+    page = requests.get(link)
+
+    soup = BeautifulSoup(page.content,features="html.parser")
+
+    imagelink = soup.find("img", {"itemprop" : "image"})
+    return imagelink['src']
 
 #allimages = {}
 #for x in imagelinks:
@@ -97,8 +106,8 @@ def findImageLinks(movies, movieids):
 #print(*imagelinks, sep = '\n')
 
 #download image to display
-def downloadImage(x, imagelinks):
-    r = requests.get(imagelinks[x], stream=True)
+def downloadImage(imagelink):
+    r = requests.get(imagelink, stream=True)
     if r.status_code == 200:
         with open("img.png", 'wb') as f:
             r.raw.decode_content = True
