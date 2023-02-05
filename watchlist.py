@@ -8,10 +8,13 @@ import shutil
 import urllib.request
 from PIL import ImageTk, Image
 import csv
-
+import time
 
 
 def getMovies(username, genre):
+    start1 = time.time()
+    
+
     i = 1
     x = 1
 
@@ -44,12 +47,14 @@ def getMovies(username, genre):
     foundlistincache, movies = readCSVCache(username, genre)
     if foundlistincache:
         if(len(movies) != 0):
-            print(movies)
+            # print(movies)
+            pass
         else:
             print("You have no " + inp.title() +  " movies in your watchlist.")
         return movies
 
     #use beautifulSoup to get movies from link
+    start2 = time.time()
     while(i!=0):
         i = 0
         URL = "https://letterboxd.com/" + username + "/watchlist/" + genre + "page/" + str(x)
@@ -74,13 +79,20 @@ def getMovies(username, genre):
         #     movieids.append(movie['data-film-id'])
         x += 1
 
+    end2 = time.time()
     if(len(movies) != 0):
         print(movies)
     else:
         print("You have no " + inp.title() +  " movies in your watchlist.")
 
     createcsvcache(username, genre, movies)
+    end1 = time.time()
+    print("whole runtime: ")
+    print(end1 - start1)
+    print("loop runtime: ")
+    print(end2 - start2)
     return movies
+
 
 
 
@@ -151,7 +163,7 @@ def readCSVCache(username, genre):
 
 def createcsvcache(username, genre, movies):
     print(username,genre)
-    with open("D:\\Users\\SenpaiOrigin\\Documents\\LetterboxdMovieParser\\cachedmovies.csv", 'a', newline='') as file:
+    with open("D:\\Users\\SenpaiOrigin\\Documents\\LetterboxdMovieParser\\cachedmovies.csv", 'a', newline='', encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(["us3rn4m3: " + username])
         writer.writerow(["g3nP3: " + genre])
