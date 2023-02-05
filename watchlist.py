@@ -7,7 +7,7 @@ import wget
 import shutil
 import urllib.request
 from PIL import ImageTk, Image
-
+import csv
 
 
 
@@ -17,6 +17,7 @@ def getMovies(username, genre):
 
     y=0
 
+    foundlistincache = False
     movies = []
     movieids = []
     genres = ['action','adventure', 'animation', 'comedy', 'crime', 'documentary', 'drama', 'family',
@@ -40,6 +41,14 @@ def getMovies(username, genre):
     if(inp == 'all'):
         genre = ''
 
+    foundlistincache, movies = readCSVCache(username, genre)
+    if foundlistincache:
+        if(len(movies) != 0):
+            print(movies)
+        else:
+            print("You have no " + inp.title() +  " movies in your watchlist.")
+        return movies
+
     #use beautifulSoup to get movies from link
     while(i!=0):
         i = 0
@@ -50,8 +59,9 @@ def getMovies(username, genre):
 
         
         movieresults = soup.find_all("img", {"class" : "image"})
-        idresults = soup.find_all("div", {"class" : "film-poster"})
-
+        # find movies div
+        # idresults = soup.find_all("div", {"class" : "film-poster"})
+        # print(movieresults)
         for movie in movieresults:
             try:
                 movies.append(movie['alt'])
@@ -59,8 +69,9 @@ def getMovies(username, genre):
                 pass
             i=i+1
 
-        for movie in idresults:
-            movieids.append(movie['data-film-id'])
+        # movie div attributes
+        # for movie in idresults:
+        #     movieids.append(movie['data-film-id'])
         x += 1
 
     if(len(movies) != 0):
@@ -68,7 +79,8 @@ def getMovies(username, genre):
     else:
         print("You have no " + inp.title() +  " movies in your watchlist.")
 
-    return movies, movieids
+    createcsvcache(username, genre, movies)
+    return movies
 
 
 
@@ -84,13 +96,14 @@ def findMovieLink(movie):
     link = link.lower()
     return link
 
+#doesnt work, it returns an empty poster
 def findImage(movie):
     link = findMovieLink(movie)
     page = requests.get(link)
 
     soup = BeautifulSoup(page.content,features="html.parser")
 
-    imagelink = soup.find("img", {"itemprop" : "image"})
+    imagelink = soup.find("img", {"alt" : movie})
     return imagelink['src']
 
 
@@ -107,7 +120,40 @@ def downloadImage(imagelink):
         return 0
     
 
+def readCSVCache(username, genre):
+    movies = []
+    userfound = False
+    genrefound = False
+    foundlist = False
+    with open("D:\\Users\\SenpaiOrigin\\Documents\\LetterboxdMovieParser\\cachedmovies.csv", 'r') as file:
+        reader = csv.reader(file)
+        userstring = "us3rn4m3: " + username
+        genrestring = "g3nP3: " + genre
+        for row in reader:
+            if genrefound and userfound:
+                movies = row
+                foundlist = True
+                print("list found")
+                break
+            if genrestring in row and userfound == True:
+                # cachegenre = row.replace('g3nP3: ','')
+                genrefound = True
+                # print("cachegenre found")
+                continue
+            if userstring in row:
+                # cacheusername = row.replace('us3rn4m3: ','')
+                # print("cacheusername found")
+                userfound = True
+                continue
+
+    return foundlist, movies
 
 
-
+def createcsvcache(username, genre, movies):
+    print(username,genre)
+    with open("D:\\Users\\SenpaiOrigin\\Documents\\LetterboxdMovieParser\\cachedmovies.csv", 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["us3rn4m3: " + username])
+        writer.writerow(["g3nP3: " + genre])
+        writer.writerow(movies)
 

@@ -16,13 +16,18 @@ title = ''
 def do():
   print('okay')
 
-def chooseMovie():
-  movies, movieids = watchlist.getMovies(username.get(), genre.get())
+def getMovies():
+  movies = watchlist.getMovies(username.get(), genre.get())
+  chooseMovie(movies)
+
+
+def chooseMovie(movies):
   ran = random.randint(0,len(movies)-1)
   print('chosen movie is: ' + movies[ran])
   titlelabel['text'] = movies[ran]
-  watchlist.downloadImage(watchlist.findImage(movies[ran]))
-  replaceImage()
+  # if images work:
+  # watchlist.downloadImage(watchlist.findImage(movies[ran]))
+  # replaceImage()
 
   return ran
 
@@ -30,7 +35,6 @@ def replaceImage():
   img2 = ImageTk.PhotoImage(Image.open("img.png"))
   imgLabel.configure(image = img2)
   imgLabel.image = img2
-
 
 
 
@@ -50,12 +54,15 @@ def center_window(width=700, height=700):
     root.geometry('%dx%d+%d+%d' % (width, height, x, y))
 
 list1 = []
-
-#open file and export movies to a listt
     
+try:
+  open("D:\\Users\\SenpaiOrigin\\Documents\\LetterboxdMovieParser\\cachedmovies.csv",'x')
+except:
+  pass
 
 root = tk.Tk()
 center_window(700, 700)
+
 
 root.title('Letterboxd Movie Selector')
 
@@ -70,6 +77,7 @@ label.place(relwidth=0.57, relheight=0.03, relx=0.215, rely=0.035)
 titlelabel = tk.Label(canvas, text = title, bg='white')
 titlelabel.place(relwidth=0.57, relheight=0.03, relx=0.215, rely=0.1)
 
+
 username = tk.StringVar()
 usernamelabel = tk.Entry(canvas , text = "Username: ", textvariable=username)
 usernamelabel.place(relwidth=0.57, relheight=0.05, relx=0.215, rely=0.83)
@@ -78,26 +86,28 @@ genre = tk.StringVar()
 genrelabel = tk.Entry(canvas , text = "Genre: ", textvariable=genre)
 genrelabel.place(relwidth=0.57, relheight=0.05, relx=0.215, rely=0.88)
 
-button = tk.Button(canvas, bg='gray', fg='red', text="Movie time!", command= chooseMovie)
+button = tk.Button(canvas, bg='gray', fg='black', text="Movie time!", command= getMovies)
 button.place(relwidth=0.2, relheight=0.03, relx=0.4, rely=0.95)
 
-try:
-  img = Image.open('img.png')
-  img = ImageTk.PhotoImage(img)
-  imgLabel = tk.Label(canvas, image = img, anchor= 'center')
-  imgLabel.place(relwidth=0.7, relheight=0.6, relx=0.15, rely=0.15)
-except FileNotFoundError:
-  print('Image file not found')
-  imgLabel = tk.Label(canvas, text = "" ,anchor= 'center')
-  imgLabel.place(relwidth=0.7, relheight=0.6, relx=0.15, rely=0.15)
+#imglabel
+# try:
+#   img = Image.open('img.png')
+#   img = ImageTk.PhotoImage(img)
+# imgLabel = tk.Label(canvas, image = img, anchor= 'center')
+imgLabel = tk.Label(canvas, anchor= 'center')
+imgLabel.place(relwidth=0.7, relheight=0.6, relx=0.15, rely=0.15)
+# except FileNotFoundError:
+#   print('Image file not found')
+#   imgLabel = tk.Label(canvas, text = "" ,anchor= 'center')
+#   imgLabel.place(relwidth=0.7, relheight=0.6, relx=0.15, rely=0.15)
 
 
 
 root.bind("<Return>", replaceImage)
 root.mainloop()
 
-
-try:
-  os.remove("img.png")
-except FileNotFoundError:
-  print('img.png file does not exist')
+# with images working
+# try:
+#   os.remove("img.png")
+# except FileNotFoundError:
+#   print('img.png file does not exist')
