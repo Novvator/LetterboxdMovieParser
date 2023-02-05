@@ -54,11 +54,8 @@ def getMovies(username, genre):
 
         for movie in movieresults:
             try:
-                #print(movie['data-film-name'])
                 movies.append(movie['alt'])
             except KeyError:
-                #print(movie['data-film-slug'])
-                #movies.append(movie['data-film-slug'][6:][:-1].replace("-"," ").title())
                 pass
             i=i+1
 
@@ -96,14 +93,6 @@ def findImage(movie):
     imagelink = soup.find("img", {"itemprop" : "image"})
     return imagelink['src']
 
-#allimages = {}
-#for x in imagelinks:
-#    try:
-#       allimages["img_" + str(x))] = wget.download(x)
-#    except HTTPError:
-#        print('not valid link in' + str(x))
-
-#print(*imagelinks, sep = '\n')
 
 #download image to display
 def downloadImage(imagelink):

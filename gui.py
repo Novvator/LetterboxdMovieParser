@@ -70,10 +70,6 @@ label.place(relwidth=0.57, relheight=0.03, relx=0.215, rely=0.035)
 titlelabel = tk.Label(canvas, text = title, bg='white')
 titlelabel.place(relwidth=0.57, relheight=0.03, relx=0.215, rely=0.1)
 
-
-#label1 = tk.Label(canvas, text = "", bg="#809FFF")
-#label1.place(relwidth=0.7, relheight=0.03, relx=0.15, rely=0.815)
-
 username = tk.StringVar()
 usernamelabel = tk.Entry(canvas , text = "Username: ", textvariable=username)
 usernamelabel.place(relwidth=0.57, relheight=0.05, relx=0.215, rely=0.83)
@@ -84,13 +80,6 @@ genrelabel.place(relwidth=0.57, relheight=0.05, relx=0.215, rely=0.88)
 
 button = tk.Button(canvas, bg='gray', fg='red', text="Movie time!", command= chooseMovie)
 button.place(relwidth=0.2, relheight=0.03, relx=0.4, rely=0.95)
-
-
-#get movies and links
-
-
-
-
 
 try:
   img = Image.open('img.png')
