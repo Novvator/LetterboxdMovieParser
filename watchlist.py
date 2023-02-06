@@ -10,68 +10,79 @@ from PIL import ImageTk, Image
 import csv
 import time
 
-
-def getMovies(username, genre):
-    start1 = time.time()
-    
-
-    i = 1
-    x = 1
-
-    y=0
-
-    foundlistincache = False
-    movies = []
-    movieids = []
+def setupLink(username_input, genre_input):
     genres = ['action','adventure', 'animation', 'comedy', 'crime', 'documentary', 'drama', 'family',
     'fantasy', 'history', 'horror', 'music', 'mystery', 'romance', 'science-fiction', 'thriller', 'tv-movie', 'war', 'western']
 
     #get username
-    username = username.lower()
+    username = username_input.lower()
 
     #get genre
-    inp = genre.lower()
+    genre = genre_input.lower()
 
     #if genre = random
-    if(inp == 'random'):
-        inp = genres[random.randrange(19)]
-        print('Genre is: ' + inp)
-
-    #create genre link
-    genre = ('genre/' + inp + '/').replace(" ","-").lower()
+    if(genre == 'random'):
+        genre = genres[random.randrange(19)]
+        print('Genre is: ' + genre)
 
     #if genre = all
-    if(inp == 'all'):
+    if(genre == 'all'):
         genre = ''
 
+    #create genre link
+    genre_link = ('genre/' + genre + '/').replace(" ","-").lower()\
+
+    URL = "https://letterboxd.com/" + username + "/watchlist/" + genre_link + "page/"
+
+    return URL
+
+def generateLink(URL, x):
+    return str(URL) + str(x)
+    
+
+def getMovies(username, genre, URL=None):
+    start1 = time.time()
+    
+    i = 1
+    x = 1
+
+    foundlistincache = False
+    movies = []
+    movieids = []
+
+    #check if list is cached
     foundlistincache, movies = readCSVCache(username, genre)
     if foundlistincache:
         if(len(movies) != 0):
-            # print(movies)
-            pass
-        else:
-            print("You have no " + inp.title() +  " movies in your watchlist.")
-        return movies
+            return movies
+        
+    #setup link
+    if not URL:
+        URL = setupLink(username, genre)
 
     #use beautifulSoup to get movies from link
     start2 = time.time()
     while(i!=0):
         i = 0
-        URL = "https://letterboxd.com/" + username + "/watchlist/" + genre + "page/" + str(x)
-        page = requests.get(URL)
-
-        soup = BeautifulSoup(page.content,features="html.parser")
-
         
+        link = generateLink(URL, x)
+
+        start3 = time.time()
+        page = requests.get(link)
+        end3 = time.time()
+        soup = BeautifulSoup(page.content,features="html.parser")
         movieresults = soup.find_all("img", {"class" : "image"})
+        # print(movieresults)
+
         # find movies div
         # idresults = soup.find_all("div", {"class" : "film-poster"})
-        # print(movieresults)
+
+        #create movie titles list
         for movie in movieresults:
-            try:
-                movies.append(movie['alt'])
-            except KeyError:
-                pass
+        # try:
+            movies.append(movie['alt'])
+        # except KeyError:
+            # pass
             i=i+1
 
         # movie div attributes
@@ -83,7 +94,7 @@ def getMovies(username, genre):
     if(len(movies) != 0):
         print(movies)
     else:
-        print("You have no " + inp.title() +  " movies in your watchlist.")
+        print("You have no " + genre.title() +  " movies in your watchlist.")
 
     createcsvcache(username, genre, movies)
     end1 = time.time()
@@ -91,6 +102,8 @@ def getMovies(username, genre):
     print(end1 - start1)
     print("loop runtime: ")
     print(end2 - start2)
+    print("get url runtime: ")
+    print(end3 - start3)
     return movies
 
 
@@ -147,12 +160,12 @@ def readCSVCache(username, genre):
                 foundlist = True
                 print("list found")
                 break
-            if genrestring in row and userfound == True:
+            if genrestring == row[0] and userfound == True:
                 # cachegenre = row.replace('g3nP3: ','')
                 genrefound = True
                 # print("cachegenre found")
                 continue
-            if userstring in row:
+            if userstring == row[0]:
                 # cacheusername = row.replace('us3rn4m3: ','')
                 # print("cacheusername found")
                 userfound = True
@@ -162,7 +175,6 @@ def readCSVCache(username, genre):
 
 
 def createcsvcache(username, genre, movies):
-    print(username,genre)
     with open("D:\\Users\\SenpaiOrigin\\Documents\\LetterboxdMovieParser\\cachedmovies.csv", 'a', newline='', encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(["us3rn4m3: " + username])
