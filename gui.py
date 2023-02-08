@@ -3,7 +3,7 @@ import tkinter as tk
 import watchlist
 from PIL import ImageTk, Image
 import os
-
+from imdb1 import tmdb_poster
 
 username = 'andrewgunner'
 genre = 'random'
@@ -25,11 +25,13 @@ def getMovies():
 
 def chooseMovie(movies):
   ran = random.randint(0,len(movies)-1)
-  print('chosen movie is: ' + movies[ran])
+  chosen = movies[ran]
+  print('chosen movie is: ' + chosen)
   titlelabel['text'] = movies[ran]
   # if images work:
   # watchlist.downloadImage(watchlist.findImage(movies[ran]))
-  # replaceImage()
+  tmdb_poster(chosen)
+  replaceImage()
 
   return ran
 
@@ -92,16 +94,16 @@ button = tk.Button(canvas, bg='gray', fg='black', text="Movie time!", command= g
 button.place(relwidth=0.2, relheight=0.03, relx=0.4, rely=0.95)
 
 #imglabel
-# try:
-#   img = Image.open('img.png')
-#   img = ImageTk.PhotoImage(img)
-# imgLabel = tk.Label(canvas, image = img, anchor= 'center')
-imgLabel = tk.Label(canvas, anchor= 'center')
-imgLabel.place(relwidth=0.7, relheight=0.6, relx=0.15, rely=0.15)
-# except FileNotFoundError:
-#   print('Image file not found')
-#   imgLabel = tk.Label(canvas, text = "" ,anchor= 'center')
-#   imgLabel.place(relwidth=0.7, relheight=0.6, relx=0.15, rely=0.15)
+try:
+  img = Image.open('img.png')
+  img = ImageTk.PhotoImage(img)
+  imgLabel = tk.Label(canvas, image = img, anchor= 'center')
+  imgLabel = tk.Label(canvas, anchor= 'center')
+  imgLabel.place(relwidth=0.7, relheight=0.6, relx=0.15, rely=0.15)
+except FileNotFoundError:
+  print('Image file not found')
+  imgLabel = tk.Label(canvas, text = "" ,anchor= 'center')
+  imgLabel.place(relwidth=0.7, relheight=0.6, relx=0.15, rely=0.15)
 
 
 
@@ -109,7 +111,7 @@ root.bind("<Return>", replaceImage)
 root.mainloop()
 
 # with images working
-# try:
-#   os.remove("img.png")
-# except FileNotFoundError:
-#   print('img.png file does not exist')
+try:
+  os.remove("img.png")
+except FileNotFoundError:
+  print('img.png file does not exist')
