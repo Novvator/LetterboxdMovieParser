@@ -61,9 +61,11 @@ def getMovies(username, genre, URL=None):
         URL = setupLink(username, genre)
 
     #use beautifulSoup to get movies from link
-    start2 = time.time()
-    while(i!=0):
-        i = 0
+    
+    start4 = time.time()
+    movieresults = []
+    idresults = []
+    while(True):
         
         link = generateLink(URL, x)
 
@@ -71,38 +73,54 @@ def getMovies(username, genre, URL=None):
         page = requests.get(link)
         end3 = time.time()
         soup = BeautifulSoup(page.content,features="html.parser")
-        movieresults = soup.find_all("img", {"class" : "image"})
+        currmovieresults = soup.find_all("img", {"class" : "image"})
+        if not currmovieresults:
+            break
+        movieresults += currmovieresults
         # print(movieresults)
 
         # find movies div
-        # idresults = soup.find_all("div", {"class" : "film-poster"})
+        curridresults = soup.find_all("div", {"class" : "film-poster"})
+        idresults += curridresults
 
         #create movie titles list
-        for movie in movieresults:
-        # try:
-            movies.append(movie['alt'])
+        ll = len(movieresults)
+
         # except KeyError:
             # pass
-            i=i+1
 
         # movie div attributes
-        # for movie in idresults:
-        #     movieids.append(movie['data-film-id'])
-        x += 1
 
-    end2 = time.time()
+        x += 1
+        if x == 2:
+            end4 = time.time()
+            # print(ll)
+
+    loopruntimestart = time.time()
+    for movie in movieresults:
+        # try:
+        movies.append(movie['alt'])
+
+    for movie in idresults:
+        movieids.append(movie['data-film-id'])
+        
+    loopruntimestartend = time.time()
     if(len(movies) != 0):
-        print(movies)
+        # print(movies)
+        pass
     else:
         print("You have no " + genre.title() +  " movies in your watchlist.")
 
     createcsvcache(username, genre, movies)
     end1 = time.time()
+    print("--------------------------------------")
     print("whole runtime: ")
     print(end1 - start1)
-    print("loop runtime: ")
-    print(end2 - start2)
-    print("get url runtime: ")
+    print("append movies runtime: ")
+    print(loopruntimestartend - loopruntimestart)
+    print("one get url loop runtime: ")
+    print(end4 - start4)
+    print("last  get url runtime: ")
     print(end3 - start3)
     return movies
 

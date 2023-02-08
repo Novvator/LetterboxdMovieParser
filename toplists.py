@@ -9,3 +9,6 @@ def setupTopLinks():
 
     for enum, link in enumerate(toplinks):
         getMovies("default", "def" + str(enum), link)
+
+if __name__=="__main__":
+    setupTopLinks()
