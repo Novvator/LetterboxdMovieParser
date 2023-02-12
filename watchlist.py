@@ -34,7 +34,7 @@ def setupLink(username_input, genre_input):
 
     URL = "https://letterboxd.com/" + username + "/watchlist/" + genre_link + "page/"
 
-    return URL
+    return URL, genre
 
 def generateLink(URL, x):
     return str(URL) + str(x)
@@ -43,12 +43,15 @@ def generateLink(URL, x):
 def getMovies(username, genre, URL=None):
     start1 = time.time()
     
-    i = 1
     x = 1
 
     foundlistincache = False
     movies = []
     movieids = []
+
+        #setup link
+    if not URL:
+        URL, genre = setupLink(username, genre)
 
     #check if list is cached
     foundlistincache, movies = readCSVCache(username, genre)
@@ -56,9 +59,7 @@ def getMovies(username, genre, URL=None):
         if(len(movies) != 0):
             return movies
         
-    #setup link
-    if not URL:
-        URL = setupLink(username, genre)
+
 
     #use beautifulSoup to get movies from link
     
@@ -112,16 +113,16 @@ def getMovies(username, genre, URL=None):
         print("You have no " + genre.title() +  " movies in your watchlist.")
 
     createcsvcache(username, genre, movies)
-    end1 = time.time()
-    print("--------------------------------------")
-    print("whole runtime: ")
-    print(end1 - start1)
-    print("append movies runtime: ")
-    print(loopruntimestartend - loopruntimestart)
-    print("one get url loop runtime: ")
-    print(end4 - start4)
-    print("last  get url runtime: ")
-    print(end3 - start3)
+    # end1 = time.time()
+    # print("--------------------------------------")
+    # print("whole runtime: ")
+    # print(end1 - start1)
+    # print("append movies runtime: ")
+    # print(loopruntimestartend - loopruntimestart)
+    # print("one get url loop runtime: ")
+    # print(end4 - start4)
+    # print("last  get url runtime: ")
+    # print(end3 - start3)
     return movies
 
 
@@ -198,4 +199,5 @@ def createcsvcache(username, genre, movies):
         writer.writerow(["us3rn4m3: " + username])
         writer.writerow(["g3nP3: " + genre])
         writer.writerow(movies)
+
 

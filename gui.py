@@ -4,6 +4,7 @@ import watchlist
 from PIL import ImageTk, Image
 import os
 from imdb1 import tmdb_poster
+from toplists import setupTopLinks
 
 username = 'andrewgunner'
 genre = 'random'
@@ -23,6 +24,15 @@ def getMovies():
   chooseMovie(movies)
 
 
+def getMoviesWithScore():
+  movies = watchlist.getMovies(username.get(), genre.get())
+  list1 = watchlist.getMovies('default', 'def0')
+  list2 = watchlist.getMovies('default', 'def1')
+  list3 = watchlist.getMovies('default', 'def2')
+  list4 = watchlist.getMovies('default', 'def3')
+  scores = calculate_score(movies, list1, list2, list3, list4)
+  chooseMovieFromScores(scores)
+
 def chooseMovie(movies):
   ran = random.randint(0,len(movies)-1)
   chosen = movies[ran]
@@ -34,6 +44,32 @@ def chooseMovie(movies):
   replaceImage()
 
   return ran
+
+
+def calculate_score(watchlist, list1, list2, list3, list4):
+    scores = {}
+    lists_set = [set(list1), set(list2), set(list3), set(list4)]
+    for film in set(watchlist):
+        score = 0
+        for lst in lists_set:
+            if film in lst:
+                score += 1
+        scores[film] = score
+    sorted_scores = dict(sorted(scores.items(), key=lambda x: x[1], reverse=True))
+    print(sorted_scores)
+    return sorted_scores
+
+
+def chooseMovieFromScores(scores):
+    max_score = max(scores.values())
+    films_with_max_score = [film for film, score in scores.items() if score == max_score]
+    chosen = random.choice(films_with_max_score)
+    print('chosen movie is: ' + chosen)
+    titlelabel['text'] = chosen
+    tmdb_poster(chosen)
+    replaceImage()
+    return 
+
 
 def replaceImage():
   img2 = ImageTk.PhotoImage(Image.open("img.png"))
@@ -91,7 +127,10 @@ genrelabel = tk.Entry(canvas , text = "Genre: ", textvariable=genre)
 genrelabel.place(relwidth=0.57, relheight=0.05, relx=0.215, rely=0.88)
 
 button = tk.Button(canvas, bg='gray', fg='black', text="Movie time!", command= getMovies)
-button.place(relwidth=0.2, relheight=0.03, relx=0.4, rely=0.95)
+button.place(relwidth=0.2, relheight=0.03, relx=0.6, rely=0.95)
+
+button = tk.Button(canvas, bg='gray', fg='black', text="Movie Time Scores!", command= getMoviesWithScore)
+button.place(relwidth=0.2, relheight=0.03, relx=0.2, rely=0.95)
 
 #imglabel
 try:
