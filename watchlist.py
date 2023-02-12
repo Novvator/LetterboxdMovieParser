@@ -75,8 +75,6 @@ def getMovies(username, genre, URL=None):
         end3 = time.time()
         soup = BeautifulSoup(page.content,features="html.parser")
         currmovieresults = soup.find_all("img", {"class" : "image"})
-        if not currmovieresults:
-            break
         movieresults += currmovieresults
         # print(movieresults)
 
@@ -91,6 +89,9 @@ def getMovies(username, genre, URL=None):
             # pass
 
         # movie div attributes
+        next_button = soup.find("a", {"class":"next"})
+        if not next_button:
+            break
 
         x += 1
         if x == 2:
