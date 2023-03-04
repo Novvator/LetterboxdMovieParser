@@ -1,5 +1,9 @@
 import random
 import tkinter as tk
+
+from bs4 import BeautifulSoup
+import requests
+from tmdb import tmbd_poster_from_link
 import watchlist
 from PIL import ImageTk, Image
 import os
@@ -14,7 +18,8 @@ movies = []
 movieids = []
 title = ''
 
-
+#--------------------------------------------------------
+#IT NOW WORKS ONLY THE FIRST TIME - TODO FIX CREATECSVCACHE WITH PICKLE
 
 def do():
   print('okay')
@@ -26,21 +31,23 @@ def getMovies():
 
 def getMoviesWithScore():
   movies = watchlist.getMovies(username.get(), genre.get())
+  movieslist = list(movies)
   list1 = watchlist.getMovies('default', 'def0')
   list2 = watchlist.getMovies('default', 'def1')
   list3 = watchlist.getMovies('default', 'def2')
   list4 = watchlist.getMovies('default', 'def3')
-  scores = calculate_score(movies, list1, list2, list3, list4)
-  chooseMovieFromScores(scores)
+  scores = calculate_score(movieslist, list1, list2, list3, list4)
+  chooseMovieFromScores(scores, movies)
 
 def chooseMovie(movies):
-  ran = random.randint(0,len(movies)-1)
-  chosen = movies[ran]
+  movieslist = list(movies)
+  ran = random.randint(0,len(movieslist)-1)
+  chosen = movieslist[ran]
   print('chosen movie is: ' + chosen)
-  titlelabel['text'] = movies[ran]
+  titlelabel['text'] = movieslist[ran]
   # if images work:
   # watchlist.downloadImage(watchlist.findImage(movies[ran]))
-  tmdb_poster(chosen)
+  tmbd_poster_from_link(get_tmdb_link(movies[chosen]))
   replaceImage()
 
   return ran
@@ -60,16 +67,23 @@ def calculate_score(watchlist, list1, list2, list3, list4):
     return sorted_scores
 
 
-def chooseMovieFromScores(scores):
+def chooseMovieFromScores(scores, movies):
     max_score = max(scores.values())
     films_with_max_score = [film for film, score in scores.items() if score == max_score]
     chosen = random.choice(films_with_max_score)
     print('chosen movie is: ' + chosen)
     titlelabel['text'] = chosen
-    tmdb_poster(chosen)
+    tmbd_poster_from_link(get_tmdb_link(movies[chosen]))
     replaceImage()
     return 
 
+def get_tmdb_link(chosen_movie_link):
+    url = 'http://letterboxd.com' + chosen_movie_link
+    page = requests.get(url)
+    soup = BeautifulSoup(page.content,features="html.parser")
+    tmdb_element = soup.find("a", {"data-track-action": "TMDb"})
+    tmdb_link = tmdb_element['href']
+    return tmdb_link
 
 def replaceImage():
   img2 = ImageTk.PhotoImage(Image.open("img.png"))

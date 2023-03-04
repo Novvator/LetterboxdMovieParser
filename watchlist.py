@@ -47,7 +47,7 @@ def getMovies(username, genre, URL=None):
 
     foundlistincache = False
     movies = []
-    movieids = []
+    movielinkparts = []
 
         #setup link
     if not URL:
@@ -65,13 +65,15 @@ def getMovies(username, genre, URL=None):
     
     start4 = time.time()
     movieresults = []
-    idresults = []
+    movielinkpartsresults = []
     while(True):
         
         link = generateLink(URL, x)
 
         start3 = time.time()
         page = requests.get(link)
+        with open('./saving.html', 'wb+') as f:
+            f.write(page.content)
         end3 = time.time()
         soup = BeautifulSoup(page.content,features="html.parser")
         currmovieresults = soup.find_all("img", {"class" : "image"})
@@ -80,10 +82,7 @@ def getMovies(username, genre, URL=None):
 
         # find movies div
         curridresults = soup.find_all("div", {"class" : "film-poster"})
-        idresults += curridresults
-
-        #create movie titles list
-        ll = len(movieresults)
+        movielinkpartsresults += curridresults
 
         # except KeyError:
             # pass
@@ -103,8 +102,8 @@ def getMovies(username, genre, URL=None):
         # try:
         movies.append(movie['alt'])
 
-    for movie in idresults:
-        movieids.append(movie['data-film-id'])
+    for movielinkpart in movielinkpartsresults:
+        movielinkparts.append(movielinkpart['data-film-slug'])
         
     loopruntimestartend = time.time()
     if(len(movies) != 0):
@@ -124,7 +123,8 @@ def getMovies(username, genre, URL=None):
     # print(end4 - start4)
     # print("last  get url runtime: ")
     # print(end3 - start3)
-    return movies
+    moviesdict = dict(zip(movies, movielinkparts))
+    return moviesdict
 
 
 
@@ -163,7 +163,6 @@ def downloadImage(imagelink):
     else:
         print('Error: Could not get image')
         return 0
-    
 
 def readCSVCache(username, genre):
     movies = []
