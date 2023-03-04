@@ -170,7 +170,7 @@ def readCSVCache(username, genre):
     userfound = False
     genrefound = False
     foundlist = False
-    with open("D:\\Users\\SenpaiOrigin\\Documents\\LetterboxdMovieParser\\cachedmovies.csv", 'r') as file:
+    with open("D:\\Users\\SenpaiOrigin\\Documents\\LetterboxdMovieParser\\cachedmovies.csv", 'r', encoding="utf-8") as file:
         reader = csv.reader(file)
         userstring = "us3rn4m3: " + username
         genrestring = "g3nP3: " + genre
