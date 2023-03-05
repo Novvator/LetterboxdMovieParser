@@ -85,6 +85,20 @@ def get_tmdb_link(chosen_movie_link):
     tmdb_link = tmdb_element['href']
     return tmdb_link
 
+def deleteCachedMovies():
+    # Get the current working directory
+    cwd = os.getcwd()
+    # Specify the name of the pickle file
+    pickle_filename = "cachedmovies.pkl"
+    # Combine the current working directory and file name to get the full path
+    pickle_path = os.path.join(cwd, pickle_filename)
+    # Check if the file exists before deleting it
+    if os.path.exists(pickle_path):
+        os.remove(pickle_path)
+        print("Pickle file deleted successfully!")
+    else:
+        print("Pickle file does not exist.")
+
 def replaceImage():
   img2 = ImageTk.PhotoImage(Image.open("img.png"))
   imgLabel.configure(image = img2)
@@ -139,6 +153,12 @@ usernamelabel.place(relwidth=0.57, relheight=0.05, relx=0.215, rely=0.83)
 genre = tk.StringVar()
 genrelabel = tk.Entry(canvas , text = "Genre: ", textvariable=genre)
 genrelabel.place(relwidth=0.57, relheight=0.05, relx=0.215, rely=0.88)
+
+button = tk.Button(canvas, bg='gray', fg='black', text="Download Top Lists", command= setupTopLinks)
+button.place(relwidth=0.18, relheight=0.03, relx=0.015, rely=0.888)
+
+button = tk.Button(canvas, bg='gray', fg='black', text="Delete Cached Movies", command= deleteCachedMovies)
+button.place(relwidth=0.18, relheight=0.03, relx=0.8, rely=0.888)
 
 button = tk.Button(canvas, bg='gray', fg='black', text="Movie time!", command= getMovies)
 button.place(relwidth=0.2, relheight=0.03, relx=0.6, rely=0.95)

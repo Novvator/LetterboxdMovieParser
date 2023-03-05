@@ -36,4 +36,4 @@ def tmbd_poster_from_link(tmdb_url):
         print('Error:', response.status_code)
 
 if __name__=="__main__":
-    tmbd_poster_from_link('')
+    tmbd_poster_from_link('https://www.themoviedb.org/movie/846867/')

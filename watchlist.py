@@ -1,4 +1,5 @@
 from operator import ge
+import pickle
 from urllib.error import HTTPError
 import requests
 import random
@@ -42,7 +43,7 @@ def generateLink(URL, x):
 
 def getMovies(username, genre, URL=None):
     start1 = time.time()
-    
+    cache_dict = {}
     x = 1
 
     foundlistincache = False
@@ -54,7 +55,7 @@ def getMovies(username, genre, URL=None):
         URL, genre = setupLink(username, genre)
 
     #check if list is cached
-    foundlistincache, movies = readCSVCache(username, genre)
+    foundlistincache, movies, cache_dict = readPickleCache(username, genre, cache_dict)
     if foundlistincache:
         if(len(movies) != 0):
             return movies
@@ -98,12 +99,12 @@ def getMovies(username, genre, URL=None):
             # print(ll)
 
     loopruntimestart = time.time()
-    for movie in movieresults:
+    for enum, movie in enumerate(movieresults):
         # try:
-        movies.append(movie['alt'])
+        movies[movie['alt']] = movielinkpartsresults[enum]['data-film-slug']
 
-    for movielinkpart in movielinkpartsresults:
-        movielinkparts.append(movielinkpart['data-film-slug'])
+    # for movielinkpart in movielinkpartsresults:
+    #     movielinkparts.append(movielinkpart['data-film-slug'])
         
     loopruntimestartend = time.time()
     if(len(movies) != 0):
@@ -112,7 +113,7 @@ def getMovies(username, genre, URL=None):
     else:
         print("You have no " + genre.title() +  " movies in your watchlist.")
 
-    createcsvcache(username, genre, movies)
+    createPickleCache(username, genre, movies, cache_dict)
     # end1 = time.time()
     # print("--------------------------------------")
     # print("whole runtime: ")
@@ -124,7 +125,7 @@ def getMovies(username, genre, URL=None):
     # print("last  get url runtime: ")
     # print(end3 - start3)
     moviesdict = dict(zip(movies, movielinkparts))
-    return moviesdict
+    return movies
 
 
 
@@ -164,40 +165,69 @@ def downloadImage(imagelink):
         print('Error: Could not get image')
         return 0
 
-def readCSVCache(username, genre):
-    movies = []
-    userfound = False
-    genrefound = False
-    foundlist = False
-    with open("D:\\Users\\SenpaiOrigin\\Documents\\LetterboxdMovieParser\\cachedmovies.csv", 'r', encoding="utf-8") as file:
-        reader = csv.reader(file)
-        userstring = "us3rn4m3: " + username
-        genrestring = "g3nP3: " + genre
-        for row in reader:
-            if genrefound and userfound:
-                movies = row
-                foundlist = True
-                print("list found")
-                break
-            if genrestring == row[0] and userfound == True:
-                # cachegenre = row.replace('g3nP3: ','')
-                genrefound = True
-                # print("cachegenre found")
-                continue
-            if userstring == row[0]:
-                # cacheusername = row.replace('us3rn4m3: ','')
-                # print("cacheusername found")
-                userfound = True
-                continue
+# def readCSVCache(username, genre):
+#     movies = []
+#     userfound = False
+#     genrefound = False
+#     foundlist = False
+#     with open("D:\\Users\\SenpaiOrigin\\Documents\\LetterboxdMovieParser\\cachedmovies.csv", 'r', encoding="utf-8") as file:
+#         reader = csv.reader(file)
+#         userstring = "us3rn4m3: " + username
+#         genrestring = "g3nP3: " + genre
+#         for row in reader:
+#             if genrefound and userfound:
+#                 movies = row
+#                 foundlist = True
+#                 print("list found")
+#                 break
+#             if genrestring == row[0] and userfound == True:
+#                 # cachegenre = row.replace('g3nP3: ','')
+#                 genrefound = True
+#                 # print("cachegenre found")
+#                 continue
+#             if userstring == row[0]:
+#                 # cacheusername = row.replace('us3rn4m3: ','')
+#                 # print("cacheusername found")
+#                 userfound = True
+#                 continue
 
-    return foundlist, movies
-
-
-def createcsvcache(username, genre, movies):
-    with open("D:\\Users\\SenpaiOrigin\\Documents\\LetterboxdMovieParser\\cachedmovies.csv", 'a', newline='', encoding="utf-8") as file:
-        writer = csv.writer(file)
-        writer.writerow(["us3rn4m3: " + username])
-        writer.writerow(["g3nP3: " + genre])
-        writer.writerow(movies)
+#     return foundlist, movies
 
 
+# def createcsvcache(username, genre, movies):
+#     with open("D:\\Users\\SenpaiOrigin\\Documents\\LetterboxdMovieParser\\cachedmovies.csv", 'a', newline='', encoding="utf-8") as file:
+#         writer = csv.writer(file)
+#         writer.writerow(["us3rn4m3: " + username])
+#         writer.writerow(["g3nP3: " + genre])
+#         writer.writerow(movies)
+
+
+# def readPickleCache(username, genre):
+#     movies = []
+#     with open(f"{username}_{genre}.pkl", 'rb') as file:
+#         movies = pickle.load(file)
+#     foundlist = bool(movies)
+#     return foundlist, movies
+
+def readPickleCache(username, genre, cache_dict):
+    try:
+        with open("cachedmovies.pkl", 'rb') as file:
+            cache_dict = pickle.load(file)
+    except FileNotFoundError:
+        print('cache_dict not found')
+        
+    key = f"{username}_{genre}"
+    movies = cache_dict.get(key, {})
+    foundlist = bool(movies)
+    print(cache_dict.keys())
+    return foundlist, movies, cache_dict
+
+# def createPickleCache(username, genre, movies):
+#     with open(f"{username}_{genre}.pkl", 'wb') as file:
+#         pickle.dump(movies, file)
+
+def createPickleCache(username, genre, movies, cache_dict):
+    key = f"{username}_{genre}"
+    cache_dict[key] = movies
+    with open("cachedmovies.pkl", 'wb') as file:
+        pickle.dump(cache_dict, file)
