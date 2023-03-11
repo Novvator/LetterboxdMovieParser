@@ -9,6 +9,7 @@ from PIL import ImageTk, Image
 import os
 from imdb1 import tmdb_poster
 from toplists import setupTopLinks
+from movie import currentMovie
 
 username = 'andrewgunner'
 genre = 'random'
@@ -17,9 +18,6 @@ ran = 2
 movies = []
 movieids = []
 title = ''
-
-#--------------------------------------------------------
-#IT NOW WORKS ONLY THE FIRST TIME - TODO FIX CREATECSVCACHE WITH PICKLE
 
 def do():
   print('okay')
@@ -39,18 +37,25 @@ def getMoviesWithScore():
   scores = calculate_score(movieslist, list1, list2, list3, list4)
   chooseMovieFromScores(scores, movies)
 
+# def chooseMovie(movies):
 def chooseMovie(movies):
   movieslist = list(movies)
   ran = random.randint(0,len(movieslist)-1)
-  chosen = movieslist[ran]
-  print('chosen movie is: ' + chosen)
-  titlelabel['text'] = movieslist[ran]
+  # chosen = movieslist[ran]
+  currentMovie.title = movieslist[ran]
+  currentMovie.setupLinks(movies[currentMovie.title])
+  # print('chosen movie is: ' + chosen)
+  print('chosen movie is: ' + currentMovie.title)
+  # titlelabel['text'] = movieslist[ran]
+  titlelabel['text'] = currentMovie.title
   # if images work:
   # watchlist.downloadImage(watchlist.findImage(movies[ran]))
-  tmbd_poster_from_link(get_tmdb_link(movies[chosen]))
+  # tmbd_poster_from_link(get_tmdb_link(movies[chosen]))
+  # tmbd_poster_from_link(get_tmdb_link(currentMovie.link))
+  tmbd_poster_from_link(currentMovie.tmdblink)
   replaceImage()
 
-  return ran
+  # return ran
 
 
 def calculate_score(watchlist, list1, list2, list3, list4):
@@ -70,20 +75,18 @@ def calculate_score(watchlist, list1, list2, list3, list4):
 def chooseMovieFromScores(scores, movies):
     max_score = max(scores.values())
     films_with_max_score = [film for film, score in scores.items() if score == max_score]
-    chosen = random.choice(films_with_max_score)
-    print('chosen movie is: ' + chosen)
-    titlelabel['text'] = chosen
-    tmbd_poster_from_link(get_tmdb_link(movies[chosen]))
+    # chosen = random.choice(films_with_max_score)
+    currentMovie.title = random.choice(films_with_max_score)
+    currentMovie.setupLinks(movies[currentMovie.title])
+    print('chosen movie is: ' + currentMovie.title)
+    titlelabel['text'] = currentMovie.title
+    # tmbd_poster_from_link(get_tmdb_link(movies[chosen]))
+    # tmbd_poster_from_link(get_tmdb_link(currentMovie.link))
+    tmbd_poster_from_link(currentMovie.tmdblink)
     replaceImage()
-    return 
+    # return 
 
-def get_tmdb_link(chosen_movie_link):
-    url = 'http://letterboxd.com' + chosen_movie_link
-    page = requests.get(url)
-    soup = BeautifulSoup(page.content,features="html.parser")
-    tmdb_element = soup.find("a", {"data-track-action": "TMDb"})
-    tmdb_link = tmdb_element['href']
-    return tmdb_link
+
 
 def deleteCachedMovies():
     # Get the current working directory
@@ -155,16 +158,16 @@ genrelabel = tk.Entry(canvas , text = "Genre: ", textvariable=genre)
 genrelabel.place(relwidth=0.57, relheight=0.05, relx=0.215, rely=0.88)
 
 button = tk.Button(canvas, bg='gray', fg='black', text="Download Top Lists", command= setupTopLinks)
-button.place(relwidth=0.18, relheight=0.03, relx=0.015, rely=0.888)
+button.place(relwidth=0.18, relheight=0.03, relx=0.035, rely=0.95)
 
 button = tk.Button(canvas, bg='gray', fg='black', text="Delete Cached Movies", command= deleteCachedMovies)
-button.place(relwidth=0.18, relheight=0.03, relx=0.8, rely=0.888)
+button.place(relwidth=0.18, relheight=0.03, relx=0.78, rely=0.95)
 
 button = tk.Button(canvas, bg='gray', fg='black', text="Movie time!", command= getMovies)
-button.place(relwidth=0.2, relheight=0.03, relx=0.6, rely=0.95)
+button.place(relwidth=0.2, relheight=0.03, relx=0.53, rely=0.95)
 
 button = tk.Button(canvas, bg='gray', fg='black', text="Movie Time Scores!", command= getMoviesWithScore)
-button.place(relwidth=0.2, relheight=0.03, relx=0.2, rely=0.95)
+button.place(relwidth=0.2, relheight=0.03, relx=0.27, rely=0.95)
 
 #imglabel
 try:
