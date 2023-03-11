@@ -73,8 +73,6 @@ def getMovies(username, genre, URL=None):
 
         start3 = time.time()
         page = requests.get(link)
-        with open('./saving.html', 'wb+') as f:
-            f.write(page.content)
         end3 = time.time()
         soup = BeautifulSoup(page.content,features="html.parser")
         currmovieresults = soup.find_all("img", {"class" : "image"})
