@@ -1,10 +1,11 @@
 import os
 import requests
 import re
+from apikeyfile import tmdb_api_key
 
 # Set up the API endpoint and parameters
 def tmbd_poster_from_link(tmdb_url):
-    api_key = '70a0207fb286f95fb40238e3910d0f0e'
+    api_key = tmdb_api_key
     pattern = r'/movie/(\d+)/?$'  # Regex pattern to extract the movie ID
     movie_id = re.search(pattern, tmdb_url).group(1)
     url = f'https://api.themoviedb.org/3/movie/{movie_id}'
