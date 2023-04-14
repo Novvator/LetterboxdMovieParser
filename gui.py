@@ -1,13 +1,9 @@
 import random
 import tkinter as tk
-
-from bs4 import BeautifulSoup
-import requests
 from tmdb import tmbd_poster_from_link
 import watchlist
 from PIL import ImageTk, Image
 import os
-from imdb1 import tmdb_poster
 from toplists import setupTopLinks
 from movie import currentMovie
 
