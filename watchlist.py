@@ -31,7 +31,7 @@ def setupLink(username_input, genre_input):
         genre = ''
 
     #create genre link
-    genre_link = ('genre/' + genre + '/').replace(" ","-").lower()\
+    genre_link = ('genre/' + genre + '/').replace(" ","-").lower()
 
     URL = "https://letterboxd.com/" + username + "/watchlist/" + genre_link + "page/"
 
@@ -42,15 +42,13 @@ def generateLink(URL, x):
     
 
 def getMovies(username, genre, URL=None):
-    start1 = time.time()
+
+    foundlistincache = False
+    movies = {}
     cache_dict = {}
     x = 1
 
-    foundlistincache = False
-    movies = []
-    movielinkparts = []
-
-        #setup link
+    #setup link
     if not URL:
         URL, genre = setupLink(username, genre)
 
@@ -60,51 +58,35 @@ def getMovies(username, genre, URL=None):
         if(len(movies) != 0):
             return movies
         
-
-
     #use beautifulSoup to get movies from link
-    
-    start4 = time.time()
     movieresults = []
     movielinkpartsresults = []
     while(True):
-        
-        link = generateLink(URL, x)
 
-        start3 = time.time()
+        # generate link and parse with soup
+        link = generateLink(URL, x)
         page = requests.get(link)
-        end3 = time.time()
         soup = BeautifulSoup(page.content,features="html.parser")
+
+        # find movies element
         currmovieresults = soup.find_all("img", {"class" : "image"})
         movieresults += currmovieresults
-        # print(movieresults)
 
-        # find movies div
-        curridresults = soup.find_all("div", {"class" : "film-poster"})
-        movielinkpartsresults += curridresults
+        # find movies link poster element
+        currdivresults = soup.find_all("div", {"class" : "film-poster"})
+        movielinkpartsresults += currdivresults
 
-        # except KeyError:
-            # pass
-
-        # movie div attributes
+        # if there is next page button continue loop
         next_button = soup.find("a", {"class":"next"})
         if not next_button:
             break
 
         x += 1
-        if x == 2:
-            end4 = time.time()
-            # print(ll)
 
-    loopruntimestart = time.time()
+    # put linkparts into movies dict
     for enum, movie in enumerate(movieresults):
-        # try:
         movies[movie['alt']] = movielinkpartsresults[enum]['data-film-slug']
-
-    # for movielinkpart in movielinkpartsresults:
-    #     movielinkparts.append(movielinkpart['data-film-slug'])
         
-    loopruntimestartend = time.time()
     if(len(movies) != 0):
         # print(movies)
         pass
@@ -112,20 +94,7 @@ def getMovies(username, genre, URL=None):
         print("You have no " + genre.title() +  " movies in your watchlist.")
 
     createPickleCache(username, genre, movies, cache_dict)
-    # end1 = time.time()
-    # print("--------------------------------------")
-    # print("whole runtime: ")
-    # print(end1 - start1)
-    # print("append movies runtime: ")
-    # print(loopruntimestartend - loopruntimestart)
-    # print("one get url loop runtime: ")
-    # print(end4 - start4)
-    # print("last  get url runtime: ")
-    # print(end3 - start3)
-    moviesdict = dict(zip(movies, movielinkparts))
     return movies
-
-
 
 
 def findMovieLink(movie):
@@ -140,72 +109,29 @@ def findMovieLink(movie):
     link = link.lower()
     return link
 
-#doesnt work, it returns an empty poster
-def findImage(movie):
-    link = findMovieLink(movie)
-    page = requests.get(link)
+#doesnt work, it used to return the poster, now returns an empty one
 
-    soup = BeautifulSoup(page.content,features="html.parser")
+# def findImage(movie):
+#     link = findMovieLink(movie)
+#     page = requests.get(link)
 
-    imagelink = soup.find("img", {"alt" : movie})
-    return imagelink['src']
+#     soup = BeautifulSoup(page.content,features="html.parser")
 
+#     imagelink = soup.find("img", {"alt" : movie})
+#     return imagelink['src']
 
-#download image to display
-def downloadImage(imagelink):
-    r = requests.get(imagelink, stream=True)
-    if r.status_code == 200:
-        with open("img.png", 'wb') as f:
-            r.raw.decode_content = True
-            shutil.copyfileobj(r.raw, f)
-        return 'img.png'
-    else:
-        print('Error: Could not get image')
-        return 0
+# old download image to display
 
-# def readCSVCache(username, genre):
-#     movies = []
-#     userfound = False
-#     genrefound = False
-#     foundlist = False
-#     with open("D:\\Users\\SenpaiOrigin\\Documents\\LetterboxdMovieParser\\cachedmovies.csv", 'r', encoding="utf-8") as file:
-#         reader = csv.reader(file)
-#         userstring = "us3rn4m3: " + username
-#         genrestring = "g3nP3: " + genre
-#         for row in reader:
-#             if genrefound and userfound:
-#                 movies = row
-#                 foundlist = True
-#                 print("list found")
-#                 break
-#             if genrestring == row[0] and userfound == True:
-#                 # cachegenre = row.replace('g3nP3: ','')
-#                 genrefound = True
-#                 # print("cachegenre found")
-#                 continue
-#             if userstring == row[0]:
-#                 # cacheusername = row.replace('us3rn4m3: ','')
-#                 # print("cacheusername found")
-#                 userfound = True
-#                 continue
-
-#     return foundlist, movies
-
-
-# def createcsvcache(username, genre, movies):
-#     with open("D:\\Users\\SenpaiOrigin\\Documents\\LetterboxdMovieParser\\cachedmovies.csv", 'a', newline='', encoding="utf-8") as file:
-#         writer = csv.writer(file)
-#         writer.writerow(["us3rn4m3: " + username])
-#         writer.writerow(["g3nP3: " + genre])
-#         writer.writerow(movies)
-
-
-# def readPickleCache(username, genre):
-#     movies = []
-#     with open(f"{username}_{genre}.pkl", 'rb') as file:
-#         movies = pickle.load(file)
-#     foundlist = bool(movies)
-#     return foundlist, movies
+# def downloadImage(imagelink):
+#     r = requests.get(imagelink, stream=True)
+#     if r.status_code == 200:
+#         with open("img.png", 'wb') as f:
+#             r.raw.decode_content = True
+#             shutil.copyfileobj(r.raw, f)
+#         return 'img.png'
+#     else:
+#         print('Error: Could not get image')
+#         return 0
 
 def readPickleCache(username, genre, cache_dict):
     try:
@@ -219,10 +145,6 @@ def readPickleCache(username, genre, cache_dict):
     foundlist = bool(movies)
     print(cache_dict.keys())
     return foundlist, movies, cache_dict
-
-# def createPickleCache(username, genre, movies):
-#     with open(f"{username}_{genre}.pkl", 'wb') as file:
-#         pickle.dump(movies, file)
 
 def createPickleCache(username, genre, movies, cache_dict):
     key = f"{username}_{genre}"

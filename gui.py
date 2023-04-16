@@ -7,8 +7,8 @@ import os
 from toplists import setupTopLinks
 from movie import currentMovie
 
-username = 'andrewgunner'
-genre = 'random'
+# username = 'andrewgunner'
+# genre = 'random'
 
 ran = 2
 movies = []
@@ -103,9 +103,6 @@ def replaceImage():
   imgLabel.configure(image = img2)
   imgLabel.image = img2
 
-
-
-
 #User Interface
 def changeText(self,textt):
     self.configure(text =textt)
@@ -120,30 +117,26 @@ def center_window(width=700, height=700):
     y = (screen_height/2) - (height/2)
     root.geometry('%dx%d+%d+%d' % (width, height, x, y))
 
-list1 = []
+# list1 = []
     
-try:
-  open("D:\\Users\\SenpaiOrigin\\Documents\\LetterboxdMovieParser\\cachedmovies.csv",'x')
-except:
-  pass
+# try:
+#   open("D:\\Users\\SenpaiOrigin\\Documents\\LetterboxdMovieParser\\cachedmovies.csv",'x')
+# except:
+#   pass
 
 root = tk.Tk()
 center_window(700, 700)
-
 
 root.title('Letterboxd Movie Selector')
 
 canvas = tk.Canvas(root, height=700, width=700, bg="#809FFF")
 canvas.pack()
 
-
-    
 label = tk.Label(canvas, text = "Press the button to select a random movie from your list", bg='white')
 label.place(relwidth=0.57, relheight=0.03, relx=0.215, rely=0.035)
 
 titlelabel = tk.Label(canvas, text = title, bg='white')
 titlelabel.place(relwidth=0.57, relheight=0.03, relx=0.215, rely=0.1)
-
 
 username = tk.StringVar()
 usernamelabel = tk.Entry(canvas , text = "Username: ", textvariable=username)
@@ -176,8 +169,6 @@ except FileNotFoundError:
   print('Image file not found')
   imgLabel = tk.Label(canvas, text = "" ,anchor= 'center')
   imgLabel.place(relwidth=0.7, relheight=0.6, relx=0.15, rely=0.15)
-
-
 
 root.bind("<Return>", replaceImage)
 root.mainloop()
