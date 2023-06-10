@@ -5,3 +5,4 @@ kk.py
 apikeyfile.py
 cachedmovies.pkl
 ignore_folder/
+dataset_creation/*.csv

@@ -62,5 +62,39 @@ def find_watchlist(username=None):
     print(watchlist)
     return watchlist
 
+def find_watched_list(username=None):
+    username = 'vaflacko'
+    x = 1
+    watched_list = []
+    movieresults = []
+    url = 'https://letterboxd.com/' + username + '/films/page/'
+
+    while(True):
+    
+    # generate link and parse with soup
+        link = generateLink(url, x)
+        page = requests.get(link)
+        # with open('output.html', 'a', encoding='utf-8') as file:
+        #     file.write(page.text)
+        #     file.close()
+        soup = BeautifulSoup(page.content,features="html.parser")
+
+        # find movies element
+        currmovieresults = soup.find_all("img", {"class" : "image"})
+        movieresults += currmovieresults
+
+        # if there is next page button continue loop
+        next_button = soup.find("a", {"class":"next"})
+        if not next_button:
+            break
+
+        x += 1
+    
+    for element in movieresults:
+        watched_list.append(element['alt'])
+    print(watched_list)
+    print(len(watched_list))
+    return watched_list
+
 if __name__=="__main__":
-    find_watchlist()
+    find_watched_list()
