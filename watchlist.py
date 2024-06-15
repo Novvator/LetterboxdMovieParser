@@ -1,137 +1,74 @@
-from operator import ge
 import pickle
-from urllib.error import HTTPError
 import requests
 import random
 from bs4 import BeautifulSoup
-import wget
-import shutil
-import urllib.request
-from PIL import ImageTk, Image
-import csv
-import time
+import os
 
 def setupLink(username_input, genre_input):
-    genres = ['action','adventure', 'animation', 'comedy', 'crime', 'documentary', 'drama', 'family',
-    'fantasy', 'history', 'horror', 'music', 'mystery', 'romance', 'science-fiction', 'thriller', 'tv-movie', 'war', 'western']
+    genres = [
+        'action', 'adventure', 'animation', 'comedy', 'crime', 'documentary', 
+        'drama', 'family', 'fantasy', 'history', 'horror', 'music', 'mystery', 
+        'romance', 'science-fiction', 'thriller', 'tv-movie', 'war', 'western'
+    ]
 
-    #get username
     username = username_input.lower()
-
-    #get genre
     genre = genre_input.lower()
 
-    #if genre = random
-    if(genre == 'random'):
-        genre = genres[random.randrange(19)]
-        print('Genre is: ' + genre)
+    if genre == 'random':
+        genre = random.choice(genres)
+        print('Genre is:', genre)
 
-    #if genre = all
-    if(genre == 'all'):
-        genre = ''
-
-    #create genre link
-    genre_link = ('genre/' + genre + '/').replace(" ","-").lower()
-
-    URL = "https://letterboxd.com/" + username + "/watchlist/" + genre_link + "page/"
-
+    genre_link = ('genre/' + genre + '/').replace(" ", "-").lower() if genre != 'all' else ''
+    URL = f"https://letterboxd.com/{username}/watchlist/{genre_link}page/"
+    
     return URL, genre
 
 def generateLink(URL, x):
-    return str(URL) + str(x)
+    return f"{URL}{x}"
     
-
 def getMovies(username, genre, URL=None):
-
-    foundlistincache = False
-    movies = {}
     cache_dict = {}
-    x = 1
 
-    #setup link
     if not URL:
         URL, genre = setupLink(username, genre)
 
-    #check if list is cached
     foundlistincache, movies, cache_dict = readPickleCache(username, genre, cache_dict)
-    if foundlistincache:
-        if(len(movies) != 0):
-            return movies
-        
-    #use beautifulSoup to get movies from link
-    movieresults = []
-    movielinkpartsresults = []
-    while(True):
+    if foundlistincache and movies:
+        return movies
 
-        # generate link and parse with soup
+    movies, movielinkpartsresults = [], []
+    x = 1
+
+    while True:
         link = generateLink(URL, x)
         page = requests.get(link)
-        soup = BeautifulSoup(page.content,features="html.parser")
+        soup = BeautifulSoup(page.content, features="html.parser")
 
-        # find movies element
-        currmovieresults = soup.find_all("img", {"class" : "image"})
-        movieresults += currmovieresults
+        currmovieresults = soup.find_all("img", {"class": "image"})
+        currdivresults = soup.find_all("div", {"class": "film-poster"})
 
-        # find movies link poster element
-        currdivresults = soup.find_all("div", {"class" : "film-poster"})
-        movielinkpartsresults += currdivresults
+        movies.extend(currmovieresults)
+        movielinkpartsresults.extend(currdivresults)
 
-        # if there is next page button continue loop
-        next_button = soup.find("a", {"class":"next"})
+        next_button = soup.find("a", {"class": "next"})
         if not next_button:
             break
 
         x += 1
 
-    # put linkparts into movies dict
-    for enum, movie in enumerate(movieresults):
-        movies[movie['alt']] = movielinkpartsresults[enum]['data-film-slug']
-        
-    if(len(movies) != 0):
-        # print(movies)
-        pass
+    movie_dict = {movie['alt']: linkpart['data-film-slug'] for movie, linkpart in zip(movies, movielinkpartsresults)}
+
+    if movie_dict:
+        print("Movies retrieved successfully.")
     else:
-        print("You have no " + genre.title() +  " movies in your watchlist.")
+        print(f"You have no {genre.title()} movies in your watchlist.")
 
-    createPickleCache(username, genre, movies, cache_dict)
-    return movies
-
+    createPickleCache(username, genre, movie_dict, cache_dict)
+    return movie_dict
 
 def findMovieLink(movie):
-    movie = movie.replace(".","")
-    movie = movie.replace(":","")
-    movie = movie.replace(",","")
-    movie = movie.replace("+","")
-    movie = movie.replace("(","")
-    movie = movie.replace(")","")
-    movie = movie.replace(" ", "-")
-    link = 'https://letterboxd.com/film/' + movie
-    link = link.lower()
-    return link
-
-#doesnt work, it used to return the poster, now returns an empty one
-
-# def findImage(movie):
-#     link = findMovieLink(movie)
-#     page = requests.get(link)
-
-#     soup = BeautifulSoup(page.content,features="html.parser")
-
-#     imagelink = soup.find("img", {"alt" : movie})
-#     return imagelink['src']
-
-# old download image to display
-
-# def downloadImage(imagelink):
-#     r = requests.get(imagelink, stream=True)
-#     if r.status_code == 200:
-#         with open("img.png", 'wb') as f:
-#             r.raw.decode_content = True
-#             shutil.copyfileobj(r.raw, f)
-#         return 'img.png'
-#     else:
-#         print('Error: Could not get image')
-#         return 0
+    movie = movie.translate(str.maketrans('', '', '.:,()+')).replace(" ", "-").lower()
+    return f'https://letterboxd.com/film/{movie}'
 
 def readPickleCache(username, genre, cache_dict):
     try:
