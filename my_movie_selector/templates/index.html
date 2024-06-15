@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-        <meta charset="UTF-8">
-        <title>Letterboxd Movie Selector</title>
-        <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <meta charset="UTF-8">
+    <title>Letterboxd Movie Selector</title>
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
     <header class="header">
@@ -14,6 +14,7 @@
     </header>
 
     <main class="container">
+        <!-- Single form for username and genre -->
         <form action="/get_random_movie" method="POST">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username"><br><br>
@@ -22,14 +23,12 @@
             <button type="submit">Movie Time!</button>
         </form>
         
+        <!-- Separate form for movie time scores -->
         <form action="/get_movies_with_score" method="POST">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username"><br><br>
-            <label for="genre">Genre:</label>
-            <input type="text" id="genre" name="genre"><br><br>
             <button type="submit">Movie Time Scores!</button>
         </form>
         
+        <!-- Other forms remain unchanged -->
         <form action="/download_top_lists">
             <button type="submit">Download Top Lists</button>
         </form>
@@ -38,6 +37,7 @@
             <button type="submit">Delete Cached Movies</button>
         </form>
         
+        <!-- Display movie details if available -->
         {% if title %}
         <h2>{{ title }}</h2>
         <p>TMDB Link: <a href="{{ tmdblink }}">{{ tmdblink }}</a></p>
