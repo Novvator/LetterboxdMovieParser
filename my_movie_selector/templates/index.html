@@ -14,34 +14,38 @@
     </header>
 
     <main class="container">
-        <!-- Single form for username and genre -->
-        <form action="/get_random_movie" method="POST">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username"><br><br>
-            <label for="genre">Genre:</label>
-            <input type="text" id="genre" name="genre"><br><br>
-            <button type="submit">Movie Time!</button>
-        </form>
-        
-        <!-- Separate form for movie time scores -->
-        <form action="/get_movies_with_score" method="POST">
-            <button type="submit">Movie Time Scores!</button>
-        </form>
-        
-        <!-- Other forms remain unchanged -->
-        <form action="/download_top_lists">
-            <button type="submit">Download Top Lists</button>
-        </form>
-        
-        <form action="/delete_cached_movies">
-            <button type="submit">Delete Cached Movies</button>
-        </form>
+        <!-- Movie Selection Form -->
+        <section class="movie-selection">
+            <form action="/get_random_movie" method="POST" class="movie-form">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+                <label for="genre">Genre:</label>
+                <input type="text" id="genre" name="genre" required>
+                <div class="button-row">
+                    <button type="submit">Movie Time!</button>
+                    <button type="submit" formaction="/get_movies_with_score">Movie Time Scores!</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Additional Actions -->
+        <section class="actions">
+            <form action="/download_top_lists">
+                <button type="submit">Download Top Lists</button>
+            </form>
+            
+            <form action="/delete_cached_movies">
+                <button type="submit">Delete Cached Movies</button>
+            </form>
+        </section>
         
         <!-- Display movie details if available -->
         {% if title %}
-        <h2>{{ title }}</h2>
-        <p>TMDB Link: <a href="{{ tmdblink }}">{{ tmdblink }}</a></p>
-        <img src="{{ url_for('static', filename='img.png') }}" alt="Movie Poster">
+        <section class="movie-details">
+            <h2>{{ title }}</h2>
+            <p>TMDB Link: <a href="{{ tmdblink }}">{{ tmdblink }}</a></p>
+            <img src="{{ url_for('static', filename='img.png') }}" alt="Movie Poster">
+        </section>
         {% endif %}
     </main>
     
