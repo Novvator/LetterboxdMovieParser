@@ -8,3 +8,4 @@ ignore_folder/
 dataset_creation/*.csv
 dataset_creation/movie_ids_05_15_2023.json
 chromedriver.exe
+my_movie_selector/static/img/
