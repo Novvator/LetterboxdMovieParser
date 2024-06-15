@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Letterboxd Movie Selector</title>
+</head>
+<body>
+    <h1>Letterboxd Movie Selector</h1>
+    <form action="/get_movies" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username"><br><br>
+        <label for="genre">Genre:</label>
+        <input type="text" id="genre" name="genre"><br><br>
+        <button type="submit">Get Random Movie</button>
+    </form>
+    {% if title %}
+    <h2>{{ title }}</h2>
+    <p>TMDB Link: <a href="{{ tmdblink }}">{{ tmdblink }}</a></p>
+    {% endif %}
+</body>
+</html>
