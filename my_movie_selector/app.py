@@ -23,20 +23,40 @@ def get_random_movie():
 
 @app.route('/get_movies_with_score', methods=['POST'])
 def get_movies_with_score():
+    # Retrieve movies from the watchlist based on user input
     username = request.form['username']
     genre = request.form['genre']
     movies = getMovies(username, genre)
     movie_list = list(movies)
+    
+    # Fetch default lists of movies for score calculation
     default_lists = [getMovies('default', f'def{i}') for i in range(4)]
-    # Implement your score calculation logic here
-    scores = {}
-    # Example scores calculation:
-    # scores = calculate_score(movie_list, *default_lists)
+    
+    # Calculate scores for the movies in the user's watchlist
+    scores = calculate_score(movie_list, *default_lists)
+    
+    # Check if scores dictionary is empty
+    if not scores:
+        print("No scores calculated.")
+        return
+    
+    # Determine the movie with the maximum score
     max_score = max(scores.values())
     films_with_max_score = [film for film, score in scores.items() if score == max_score]
+    
+    if not films_with_max_score:
+        print("No films with max score found.")
+        return
+    
+    # Randomly select a movie with the maximum score
     chosen_movie = random.choice(films_with_max_score)
+    
+    # Update currentMovie object with chosen movie details
     currentMovie.title = chosen_movie
+    print(movies)
     currentMovie.setupLinks(movies[currentMovie.title])
+    
+    # Update the movie display in the UI
     return update_movie_display(currentMovie.title, currentMovie.tmdblink)
 
 @app.route('/download_top_lists')
@@ -53,5 +73,15 @@ def update_movie_display(title, tmdblink):
     tmbd_poster_from_link(tmdblink)
     return render_template('index.html', title=title, tmdblink=tmdblink)
 
+def calculate_score(watchlist, *default_lists):
+    scores = {}
+    lists_set = [set(lst) for lst in default_lists]
+    for film in set(watchlist):
+        score = sum(film in lst for lst in lists_set)
+        scores[film] = score
+    sorted_scores = dict(sorted(scores.items(), key=lambda x: x[1], reverse=True))
+    print(sorted_scores)
+    return sorted_scores
+    
 if __name__ == '__main__':
     app.run(debug=True)
