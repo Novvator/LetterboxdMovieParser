@@ -1,65 +1,54 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <head>
+        <meta charset="UTF-8">
         <title>Letterboxd Movie Selector</title>
-        <script src="{{ url_for('static', filename='scripts.js') }}"></script>
-    </head>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        form {
-            margin-bottom: 20px;
-        }
-        label {
-            display: inline-block;
-            width: 100px;
-            margin-right: 10px;
-        }
-        button {
-            padding: 10px;
-            cursor: pointer;
-        }
-        img {
-            max-width: 300px;
-            max-height: 300px;
-            margin-top: 20px;
-        }
-    </style>
+        <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <h1>Letterboxd Movie Selector</h1>
+    <header class="header">
+        <div class="container">
+            <h1>Letterboxd Movie Selector</h1>
+        </div>
+    </header>
+
+    <main class="container">
+        <form action="/get_random_movie" method="POST">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username"><br><br>
+            <label for="genre">Genre:</label>
+            <input type="text" id="genre" name="genre"><br><br>
+            <button type="submit">Movie Time!</button>
+        </form>
+        
+        <form action="/get_movies_with_score" method="POST">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username"><br><br>
+            <label for="genre">Genre:</label>
+            <input type="text" id="genre" name="genre"><br><br>
+            <button type="submit">Movie Time Scores!</button>
+        </form>
+        
+        <form action="/download_top_lists">
+            <button type="submit">Download Top Lists</button>
+        </form>
+        
+        <form action="/delete_cached_movies">
+            <button type="submit">Delete Cached Movies</button>
+        </form>
+        
+        {% if title %}
+        <h2>{{ title }}</h2>
+        <p>TMDB Link: <a href="{{ tmdblink }}">{{ tmdblink }}</a></p>
+        <img src="{{ url_for('static', filename='img.png') }}" alt="Movie Poster">
+        {% endif %}
+    </main>
     
-    <form action="/get_random_movie" method="POST">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username"><br><br>
-        <label for="genre">Genre:</label>
-        <input type="text" id="genre" name="genre"><br><br>
-        <button type="submit">Movie Time!</button>
-    </form>
-    
-    <form action="/get_movies_with_score" method="POST">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username"><br><br>
-        <label for="genre">Genre:</label>
-        <input type="text" id="genre" name="genre"><br><br>
-        <button type="submit">Movie Time Scores!</button>
-    </form>
-    
-    <form action="/download_top_lists">
-        <button type="submit">Download Top Lists</button>
-    </form>
-    
-    <form action="/delete_cached_movies">
-        <button type="submit">Delete Cached Movies</button>
-    </form>
-    
-    {% if title %}
-    <h2>{{ title }}</h2>
-    <p>TMDB Link: <a href="{{ tmdblink }}">{{ tmdblink }}</a></p>
-    <img src="{{ url_for('static', filename='img.png') }}" alt="Movie Poster">
-    {% endif %}
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Letterboxd Movie Selector</p>
+        </div>
+    </footer>
 </body>
 </html>
