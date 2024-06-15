@@ -6,10 +6,12 @@ from PIL import ImageTk, Image
 import os
 from toplists import setupTopLinks
 from movie import currentMovie
+import threading
 
 class MovieSelectorApp:
     def __init__(self, root):
         self.root = root
+        self.buttons = []
         self.setup_ui()
         self.movies = []
         self.movie_ids = []
@@ -35,17 +37,21 @@ class MovieSelectorApp:
         self.genre_entry = tk.Entry(self.canvas, text="Genre: ", textvariable=self.genre)
         self.genre_entry.place(relwidth=0.57, relheight=0.05, relx=0.215, rely=0.88)
 
-        tk.Button(self.canvas, bg='gray', fg='black', text="Download Top Lists", command=setupTopLinks).place(
-            relwidth=0.18, relheight=0.03, relx=0.035, rely=0.95)
+        download_button = tk.Button(self.canvas, bg='gray', fg='black', text="Download Top Lists", command=self.threaded_function(setupTopLinks))
+        download_button.place(relwidth=0.18, relheight=0.03, relx=0.035, rely=0.95)
+        self.buttons.append(download_button)
 
-        tk.Button(self.canvas, bg='gray', fg='black', text="Delete Cached Movies", command=self.delete_cached_movies).place(
-            relwidth=0.18, relheight=0.03, relx=0.78, rely=0.95)
+        delete_button = tk.Button(self.canvas, bg='gray', fg='black', text="Delete Cached Movies", command=self.threaded_function(self.delete_cached_movies))
+        delete_button.place(relwidth=0.18, relheight=0.03, relx=0.78, rely=0.95)
+        self.buttons.append(delete_button)
 
-        tk.Button(self.canvas, bg='gray', fg='black', text="Movie time!", command=self.get_movies).place(
-            relwidth=0.2, relheight=0.03, relx=0.53, rely=0.95)
+        movie_time_button = tk.Button(self.canvas, bg='gray', fg='black', text="Movie time!", command=self.threaded_function(self.get_movies))
+        movie_time_button.place(relwidth=0.2, relheight=0.03, relx=0.53, rely=0.95)
+        self.buttons.append(movie_time_button)
 
-        tk.Button(self.canvas, bg='gray', fg='black', text="Movie Time Scores!", command=self.get_movies_with_score).place(
-            relwidth=0.2, relheight=0.03, relx=0.27, rely=0.95)
+        movie_time_scores_button = tk.Button(self.canvas, bg='gray', fg='black', text="Movie Time Scores!", command=self.threaded_function(self.get_movies_with_score))
+        movie_time_scores_button.place(relwidth=0.2, relheight=0.03, relx=0.27, rely=0.95)
+        self.buttons.append(movie_time_scores_button)
 
         self.setup_image_label()
 
@@ -65,6 +71,28 @@ class MovieSelectorApp:
             print('Image file not found')
             self.img_label = tk.Label(self.canvas, text='', anchor='center')
         self.img_label.place(relwidth=0.7, relheight=0.6, relx=0.15, rely=0.15)
+
+    def threaded_function(self, func):
+        def wrapper():
+            self.disable_buttons()
+            thread = threading.Thread(target=func)
+            thread.start()
+            self.root.after(100, self.check_thread, thread)
+        return wrapper
+
+    def check_thread(self, thread):
+        if thread.is_alive():
+            self.root.after(100, self.check_thread, thread)
+        else:
+            self.enable_buttons()
+
+    def disable_buttons(self):
+        for button in self.buttons:
+            button.config(state=tk.DISABLED)
+
+    def enable_buttons(self):
+        for button in self.buttons:
+            button.config(state=tk.NORMAL)
 
     def get_movies(self):
         movies = watchlist.getMovies(self.username.get(), self.genre.get())
@@ -129,7 +157,6 @@ if __name__ == "__main__":
     app = MovieSelectorApp(root)
     root.mainloop()
 
-    # Clean up image file after the GUI is closed
     try:
         os.remove("img.png")
     except FileNotFoundError:
