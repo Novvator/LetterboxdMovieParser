@@ -88,3 +88,11 @@ def createPickleCache(username, genre, movies, cache_dict):
     cache_dict[key] = movies
     with open("cachedmovies.pkl", 'wb') as file:
         pickle.dump(cache_dict, file)
+
+def delete_cached_movies():
+    pickle_filename = "cachedmovies.pkl"
+    if os.path.exists(pickle_filename):
+        os.remove(pickle_filename)
+        print("Pickle file deleted successfully!")
+    else:
+        print("Pickle file does not exist.")
