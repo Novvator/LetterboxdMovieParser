@@ -7,174 +7,130 @@ import os
 from toplists import setupTopLinks
 from movie import currentMovie
 
-# username = 'andrewgunner'
-# genre = 'random'
+class MovieSelectorApp:
+    def __init__(self, root):
+        self.root = root
+        self.setup_ui()
+        self.movies = []
+        self.movie_ids = []
 
-ran = 2
-movies = []
-movieids = []
-title = ''
+    def setup_ui(self):
+        self.center_window(700, 700)
+        self.root.title('Letterboxd Movie Selector')
 
-def do():
-  print('okay')
+        self.canvas = tk.Canvas(self.root, height=700, width=700, bg="#809FFF")
+        self.canvas.pack()
 
-def getMovies():
-  movies = watchlist.getMovies(username.get(), genre.get())
-  chooseMovie(movies)
+        self.label = tk.Label(self.canvas, text="Press the button to select a random movie from your list", bg='white')
+        self.label.place(relwidth=0.57, relheight=0.03, relx=0.215, rely=0.035)
 
+        self.title_label = tk.Label(self.canvas, text='', bg='white')
+        self.title_label.place(relwidth=0.57, relheight=0.03, relx=0.215, rely=0.1)
 
-def getMoviesWithScore():
-  movies = watchlist.getMovies(username.get(), genre.get())
-  movieslist = list(movies)
-  list1 = watchlist.getMovies('default', 'def0')
-  list2 = watchlist.getMovies('default', 'def1')
-  list3 = watchlist.getMovies('default', 'def2')
-  list4 = watchlist.getMovies('default', 'def3')
-  scores = calculate_score(movieslist, list1, list2, list3, list4)
-  chooseMovieFromScores(scores, movies)
+        self.username = tk.StringVar()
+        self.username_entry = tk.Entry(self.canvas, text="Username: ", textvariable=self.username)
+        self.username_entry.place(relwidth=0.57, relheight=0.05, relx=0.215, rely=0.83)
 
-# def chooseMovie(movies):
-def chooseMovie(movies):
-  movieslist = list(movies)
-  ran = random.randint(0,len(movieslist)-1)
-  # chosen = movieslist[ran]
-  currentMovie.title = movieslist[ran]
-  currentMovie.setupLinks(movies[currentMovie.title])
-  # print('chosen movie is: ' + chosen)
-  print('chosen movie is: ' + currentMovie.title)
-  # titlelabel['text'] = movieslist[ran]
-  titlelabel['text'] = currentMovie.title
-  # if images work:
-  # watchlist.downloadImage(watchlist.findImage(movies[ran]))
-  # tmbd_poster_from_link(get_tmdb_link(movies[chosen]))
-  # tmbd_poster_from_link(get_tmdb_link(currentMovie.link))
-  tmbd_poster_from_link(currentMovie.tmdblink)
-  replaceImage()
+        self.genre = tk.StringVar()
+        self.genre_entry = tk.Entry(self.canvas, text="Genre: ", textvariable=self.genre)
+        self.genre_entry.place(relwidth=0.57, relheight=0.05, relx=0.215, rely=0.88)
 
-  # return ran
+        tk.Button(self.canvas, bg='gray', fg='black', text="Download Top Lists", command=setupTopLinks).place(
+            relwidth=0.18, relheight=0.03, relx=0.035, rely=0.95)
 
+        tk.Button(self.canvas, bg='gray', fg='black', text="Delete Cached Movies", command=self.delete_cached_movies).place(
+            relwidth=0.18, relheight=0.03, relx=0.78, rely=0.95)
 
-def calculate_score(watchlist, list1, list2, list3, list4):
-    scores = {}
-    lists_set = [set(list1), set(list2), set(list3), set(list4)]
-    for film in set(watchlist):
-        score = 0
-        for lst in lists_set:
-            if film in lst:
-                score += 1
-        scores[film] = score
-    sorted_scores = dict(sorted(scores.items(), key=lambda x: x[1], reverse=True))
-    print(sorted_scores)
-    return sorted_scores
+        tk.Button(self.canvas, bg='gray', fg='black', text="Movie time!", command=self.get_movies).place(
+            relwidth=0.2, relheight=0.03, relx=0.53, rely=0.95)
 
+        tk.Button(self.canvas, bg='gray', fg='black', text="Movie Time Scores!", command=self.get_movies_with_score).place(
+            relwidth=0.2, relheight=0.03, relx=0.27, rely=0.95)
 
-def chooseMovieFromScores(scores, movies):
-    max_score = max(scores.values())
-    films_with_max_score = [film for film, score in scores.items() if score == max_score]
-    # chosen = random.choice(films_with_max_score)
-    currentMovie.title = random.choice(films_with_max_score)
-    currentMovie.setupLinks(movies[currentMovie.title])
-    print('chosen movie is: ' + currentMovie.title)
-    titlelabel['text'] = currentMovie.title
-    # tmbd_poster_from_link(get_tmdb_link(movies[chosen]))
-    # tmbd_poster_from_link(get_tmdb_link(currentMovie.link))
-    tmbd_poster_from_link(currentMovie.tmdblink)
-    replaceImage()
-    # return 
+        self.setup_image_label()
 
+    def center_window(self, width=700, height=700):
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        x = (screen_width / 2) - (width / 2)
+        y = (screen_height / 2) - (height / 2)
+        self.root.geometry(f'{width}x{height}+{int(x)}+{int(y)}')
 
+    def setup_image_label(self):
+        try:
+            img = Image.open('img.png')
+            img = ImageTk.PhotoImage(img)
+            self.img_label = tk.Label(self.canvas, image=img, anchor='center')
+        except FileNotFoundError:
+            print('Image file not found')
+            self.img_label = tk.Label(self.canvas, text='', anchor='center')
+        self.img_label.place(relwidth=0.7, relheight=0.6, relx=0.15, rely=0.15)
 
-def deleteCachedMovies():
-    # Get the current working directory
-    cwd = os.getcwd()
-    # Specify the name of the pickle file
-    pickle_filename = "cachedmovies.pkl"
-    # Combine the current working directory and file name to get the full path
-    pickle_path = os.path.join(cwd, pickle_filename)
-    # Check if the file exists before deleting it
-    if os.path.exists(pickle_path):
-        os.remove(pickle_path)
-        print("Pickle file deleted successfully!")
-    else:
-        print("Pickle file does not exist.")
+    def get_movies(self):
+        movies = watchlist.getMovies(self.username.get(), self.genre.get())
+        self.choose_movie(movies)
 
-def replaceImage():
-  img2 = ImageTk.PhotoImage(Image.open("img.png"))
-  imgLabel.configure(image = img2)
-  imgLabel.image = img2
+    def get_movies_with_score(self):
+        movies = watchlist.getMovies(self.username.get(), self.genre.get())
+        movie_list = list(movies)
+        default_lists = [watchlist.getMovies('default', f'def{i}') for i in range(4)]
+        scores = self.calculate_score(movie_list, *default_lists)
+        self.choose_movie_from_scores(scores, movies)
 
-#User Interface
-def changeText(self,textt):
-    self.configure(text =textt)
-        
-def center_window(width=700, height=700):
-    # get screen width and height
-    screen_width = root.winfo_screenwidth()
-    screen_height = root.winfo_screenheight()
+    def choose_movie(self, movies):
+        movie_list = list(movies)
+        chosen_movie = random.choice(movie_list)
+        currentMovie.title = chosen_movie
+        currentMovie.setupLinks(movies[currentMovie.title])
+        self.update_movie_display(currentMovie.title, currentMovie.tmdblink)
 
-    # calculate position x and y coordinates
-    x = (screen_width/2) - (width/2)
-    y = (screen_height/2) - (height/2)
-    root.geometry('%dx%d+%d+%d' % (width, height, x, y))
+    def calculate_score(self, watchlist, *default_lists):
+        scores = {}
+        lists_set = [set(lst) for lst in default_lists]
+        for film in set(watchlist):
+            score = sum(film in lst for lst in lists_set)
+            scores[film] = score
+        sorted_scores = dict(sorted(scores.items(), key=lambda x: x[1], reverse=True))
+        print(sorted_scores)
+        return sorted_scores
 
-# list1 = []
-    
-# try:
-#   open("D:\\Users\\SenpaiOrigin\\Documents\\LetterboxdMovieParser\\cachedmovies.csv",'x')
-# except:
-#   pass
+    def choose_movie_from_scores(self, scores, movies):
+        max_score = max(scores.values())
+        films_with_max_score = [film for film, score in scores.items() if score == max_score]
+        chosen_movie = random.choice(films_with_max_score)
+        currentMovie.title = chosen_movie
+        currentMovie.setupLinks(movies[currentMovie.title])
+        self.update_movie_display(currentMovie.title, currentMovie.tmdblink)
 
-root = tk.Tk()
-center_window(700, 700)
+    def update_movie_display(self, title, tmdblink):
+        print('chosen movie is:', title)
+        self.title_label['text'] = title
+        tmbd_poster_from_link(tmdblink)
+        self.replace_image()
 
-root.title('Letterboxd Movie Selector')
+    def delete_cached_movies(self):
+        pickle_filename = "cachedmovies.pkl"
+        if os.path.exists(pickle_filename):
+            os.remove(pickle_filename)
+            print("Pickle file deleted successfully!")
+        else:
+            print("Pickle file does not exist.")
 
-canvas = tk.Canvas(root, height=700, width=700, bg="#809FFF")
-canvas.pack()
+    def replace_image(self):
+        try:
+            img2 = ImageTk.PhotoImage(Image.open("img.png"))
+            self.img_label.configure(image=img2)
+            self.img_label.image = img2
+        except FileNotFoundError:
+            print("Image file not found.")
 
-label = tk.Label(canvas, text = "Press the button to select a random movie from your list", bg='white')
-label.place(relwidth=0.57, relheight=0.03, relx=0.215, rely=0.035)
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = MovieSelectorApp(root)
+    root.mainloop()
 
-titlelabel = tk.Label(canvas, text = title, bg='white')
-titlelabel.place(relwidth=0.57, relheight=0.03, relx=0.215, rely=0.1)
-
-username = tk.StringVar()
-usernamelabel = tk.Entry(canvas , text = "Username: ", textvariable=username)
-usernamelabel.place(relwidth=0.57, relheight=0.05, relx=0.215, rely=0.83)
-
-genre = tk.StringVar()
-genrelabel = tk.Entry(canvas , text = "Genre: ", textvariable=genre)
-genrelabel.place(relwidth=0.57, relheight=0.05, relx=0.215, rely=0.88)
-
-button = tk.Button(canvas, bg='gray', fg='black', text="Download Top Lists", command= setupTopLinks)
-button.place(relwidth=0.18, relheight=0.03, relx=0.035, rely=0.95)
-
-button = tk.Button(canvas, bg='gray', fg='black', text="Delete Cached Movies", command= deleteCachedMovies)
-button.place(relwidth=0.18, relheight=0.03, relx=0.78, rely=0.95)
-
-button = tk.Button(canvas, bg='gray', fg='black', text="Movie time!", command= getMovies)
-button.place(relwidth=0.2, relheight=0.03, relx=0.53, rely=0.95)
-
-button = tk.Button(canvas, bg='gray', fg='black', text="Movie Time Scores!", command= getMoviesWithScore)
-button.place(relwidth=0.2, relheight=0.03, relx=0.27, rely=0.95)
-
-#imglabel
-try:
-  img = Image.open('img.png')
-  img = ImageTk.PhotoImage(img)
-  imgLabel = tk.Label(canvas, image = img, anchor= 'center')
-  imgLabel = tk.Label(canvas, anchor= 'center')
-  imgLabel.place(relwidth=0.7, relheight=0.6, relx=0.15, rely=0.15)
-except FileNotFoundError:
-  print('Image file not found')
-  imgLabel = tk.Label(canvas, text = "" ,anchor= 'center')
-  imgLabel.place(relwidth=0.7, relheight=0.6, relx=0.15, rely=0.15)
-
-root.bind("<Return>", replaceImage)
-root.mainloop()
-
-# with images working
-try:
-  os.remove("img.png")
-except FileNotFoundError:
-  print('img.png file does not exist')
+    # Clean up image file after the GUI is closed
+    try:
+        os.remove("img.png")
+    except FileNotFoundError:
+        print('img.png file does not exist')
