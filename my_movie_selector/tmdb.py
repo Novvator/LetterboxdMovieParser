@@ -28,7 +28,7 @@ def tmbd_poster_from_link(tmdb_url):
         # Download the image and save it to a file0
         response = requests.get(poster_url)
         if response.status_code == requests.codes.ok:
-            path = '.'
+            path = './static'
             filename = 'img.' + 'png'
             filepath = os.path.join(path, filename)
             with open(filepath,'wb') as w:

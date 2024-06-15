@@ -5,7 +5,7 @@ from toplists import setupTopLinks
 from tmdb import tmbd_poster_from_link
 import random
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 
 @app.route('/')
 def index():
