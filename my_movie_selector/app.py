@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 from movie import Movie, currentMovie
-from watchlist import getMovies, delete_cached_movies
+from watchlist import getMovies, delete_cached_movies, calculate_score
 from toplists import setupTopLinks
 from tmdb import tmbd_poster_from_link
 import random
@@ -72,16 +72,6 @@ def delete_cached_movies_route():
 def update_movie_display(title, tmdblink):
     tmbd_poster_from_link(tmdblink)
     return render_template('index.html', title=title, tmdblink=tmdblink)
-
-def calculate_score(watchlist, *default_lists):
-    scores = {}
-    lists_set = [set(lst) for lst in default_lists]
-    for film in set(watchlist):
-        score = sum(film in lst for lst in lists_set)
-        scores[film] = score
-    sorted_scores = dict(sorted(scores.items(), key=lambda x: x[1], reverse=True))
-    print(sorted_scores)
-    return sorted_scores
     
 if __name__ == '__main__':
     app.run(debug=True)

@@ -96,3 +96,13 @@ def delete_cached_movies():
         print("Pickle file deleted successfully!")
     else:
         print("Pickle file does not exist.")
+
+def calculate_score(watchlist, *default_lists):
+    scores = {}
+    lists_set = [set(lst) for lst in default_lists]
+    for film in set(watchlist):
+        score = sum(film in lst for lst in lists_set)
+        scores[film] = score
+    sorted_scores = dict(sorted(scores.items(), key=lambda x: x[1], reverse=True))
+    print(sorted_scores)
+    return sorted_scores
