@@ -11,7 +11,7 @@ class Movie:
     def setupLinks(self, link):
     # def get_tmdb_link(chosen_movie_link):
         self.link = link
-        url = 'http://letterboxd.com' + self.link
+        url = 'http://letterboxd.com' + '/film/' + self.link
         page = requests.get(url)
         soup = BeautifulSoup(page.content,features="html.parser")
         tmdb_element = soup.find("a", {"data-track-action": "TMDb"})
