@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from movie import Movie, currentMovie
+from movie import currentMovie
 from watchlist import getMovies, delete_cached_movies, choose_movie_with_top_score
 from toplists import setupTopLinks
 from tmdb import tmbd_poster_from_link
