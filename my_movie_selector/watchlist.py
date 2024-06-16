@@ -106,3 +106,10 @@ def calculate_score(watchlist, *default_lists):
     sorted_scores = dict(sorted(scores.items(), key=lambda x: x[1], reverse=True))
     print(sorted_scores)
     return sorted_scores
+
+def choose_movie_with_top_score(movies):
+    default_lists = [getMovies('default', f'def{i}') for i in range(4)]
+    scores = calculate_score(movies, *default_lists)
+    max_score = max(scores.values())
+    films_with_max_score = [film for film, score in scores.items() if score == max_score]
+    return films_with_max_score

@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 from movie import Movie, currentMovie
-from watchlist import getMovies, delete_cached_movies, calculate_score
+from watchlist import getMovies, delete_cached_movies, choose_movie_with_top_score
 from toplists import setupTopLinks
 from tmdb import tmbd_poster_from_link
 import random
@@ -27,30 +27,10 @@ def get_movies_with_score():
     username = request.form['username']
     genre = request.form['genre']
     movies = getMovies(username, genre)
-    movie_list = list(movies)
-    
-    # Fetch default lists of movies for score calculation
-    default_lists = [getMovies('default', f'def{i}') for i in range(4)]
-    
-    # Calculate scores for the movies in the user's watchlist
-    scores = calculate_score(movie_list, *default_lists)
-    
-    # Check if scores dictionary is empty
-    if not scores:
-        print("No scores calculated.")
-        return
-    
-    # Determine the movie with the maximum score
-    max_score = max(scores.values())
-    films_with_max_score = [film for film, score in scores.items() if score == max_score]
-    
-    if not films_with_max_score:
-        print("No films with max score found.")
-        return
+    max_score_movies = choose_movie_with_top_score(list(movies))+
     
     # Randomly select a movie with the maximum score
-    chosen_movie = random.choice(films_with_max_score)
-    
+    chosen_movie = random.choice(max_score_movies)
     # Update currentMovie object with chosen movie details
     currentMovie.title = chosen_movie
     print(movies)
