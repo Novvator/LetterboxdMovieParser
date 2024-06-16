@@ -27,7 +27,7 @@ def get_movies_with_score():
     username = request.form['username']
     genre = request.form['genre']
     movies = getMovies(username, genre)
-    max_score_movies = choose_movie_with_top_score(list(movies))+
+    max_score_movies = choose_movie_with_top_score(list(movies))
     
     # Randomly select a movie with the maximum score
     chosen_movie = random.choice(max_score_movies)
