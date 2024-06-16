@@ -42,12 +42,12 @@ def get_movies_with_score():
 @app.route('/download_top_lists')
 def download_top_lists():
     setupTopLinks()
-    return "Top lists downloaded successfully!"
+    return render_template('index.html', mmessage="Top lists downloaded successfully!")
 
 @app.route('/delete_cached_movies')
 def delete_cached_movies_route():
     delete_cached_movies()
-    return "Cached movies deleted successfully!"
+    return render_template('index.html', mmessage="Cached movies deleted successfully!")
 
 def update_movie_display(title, tmdblink):
     tmbd_poster_from_link(tmdblink)

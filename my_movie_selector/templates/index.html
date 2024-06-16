@@ -38,7 +38,12 @@
                 <button type="submit">Delete Cached Movies</button>
             </form>
         </section>
-        
+        <!-- Display movie details if available -->
+        {% if mmessage %}
+        <section class="message-details">
+            <h3>{{ mmessage }}</h3>
+        </section>
+        {% endif %}
         <!-- Display movie details if available -->
         {% if title %}
         <section class="movie-details">
